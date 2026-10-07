@@ -23,6 +23,7 @@ this folder the same works with npm:
 
 ```
 src/
+  assets/logo.png     in-app logo + favicon (128 px)
   App.svelte          one window: channels, stage, transmit/mute bar
   app.css             layout defaults — colors/spacing only via tokens
   lib/engine.ts       the only door to the engine (Tauri invoke, browser mock)
@@ -33,7 +34,8 @@ src-tauri/
   src/lib.rs          Tauri commands: engine_info, get_settings, engine_command (stub until S1)
   tauri.conf.json     window, CSP, bundle (version comes from the workspace Cargo.toml)
   capabilities/       Tauri permissions (core only)
-  icons/              placeholder icon set — regenerate with `npm run tauri -- icon <1024px.png>`
+  icons/              app icons, generated from icons/source.png (1024 px):
+                      `npm run tauri -- icon src-tauri/icons/source.png -o src-tauri/icons`
 ```
 
 The app identifier is `dev.crisin.yappa-b`, so variant B installs next to variant A.

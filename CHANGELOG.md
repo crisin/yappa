@@ -4,6 +4,7 @@ One line per finished task (definition of done). Newest first.
 
 ## Unreleased
 
+- Logo (for now): app icons, sidebar logo and favicon from the cat picture.
 - Dev and production build: `cargo xtask dev [--ui]`, `cargo xtask build [--debug]` (installers), npm `app:*` scripts, release/dev profiles, apps/desktop README.
 - Dev setup: `cargo xtask setup|doctor`, pinned toolchain, nextest/cargo-deny/insta/proptest/criterion, vitest + prettier, git hooks, Claude Code hooks/skills/agent — see docs/dev-setup.md.
 - S0 CI: `.github/workflows/check.yml` — `cargo xtask check --ci` on Windows + macOS (active once pushed).
