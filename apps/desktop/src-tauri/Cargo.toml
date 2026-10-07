@@ -1,0 +1,23 @@
+[package]
+name = "yappa-desktop"
+description = "yAPPA desktop shell (Tauri 2). Thin: window, tray, hotkeys, updater; audio lives in the engine crates."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "yappa_desktop_lib"
+crate-type = ["rlib"]  # desktop only; mobile is a non-goal
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+
+[dependencies]
+tauri = { version = "2.12", features = [] }
+engine-protocol.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

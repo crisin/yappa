@@ -1,0 +1,16 @@
+{
+  "name": "Light",
+  "colors": {
+    "bg": "#f5f5f2",
+    "surface": "#ffffff",
+    "surface-raised": "#ecece8",
+    "border": "#d9d9d3",
+    "text": "#1b1c1f",
+    "text-muted": "#6a6e76",
+    "accent": "#2f8a65",
+    "accent-text": "#ffffff",
+    "speaking": "#2f8a65",
+    "danger": "#c2453c",
+    "warning": "#a8781a"
+  }
+}

@@ -28,9 +28,16 @@ Why and what follows from it: [ADR-001](docs/adr/001-variante-b-stack.md).
 
 ## Status
 
-Repository and docs only (2026-10-07). Next: S0 skeleton — see [TASKS.md](TASKS.md).
+S0 skeleton (2026-10-07): Cargo workspace, contracts with generated TS, `dsp` biquad,
+Tauri 2 + Svelte 5 shell with an engine stub. No audio yet — that is S1. Local repo only.
+Why Rust and not something else: [ADR-002](docs/adr/002-language-alternatives.md).
 
-## Prerequisites (for S0 onwards)
+## Quickstart
 
-Rust stable (rustup), Node 20+, Tauri 2 prerequisites (Windows: WebView2 + MSVC Build Tools;
-macOS: Xcode CLT), Docker Desktop for local LiveKit.
+Prerequisites: Rust stable (rustup), Node 20+, Tauri 2 prerequisites (Windows: WebView2 +
+MSVC Build Tools; macOS: Xcode CLT); Docker Desktop for local LiveKit from S1 on.
+
+```bash
+cargo xtask check                         # everything green? (installs UI deps on first run)
+npm --prefix apps/desktop run tauri dev   # the desktop app
+```

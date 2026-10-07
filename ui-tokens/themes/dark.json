@@ -1,0 +1,16 @@
+{
+  "name": "Dark",
+  "colors": {
+    "bg": "#121316",
+    "surface": "#1b1d22",
+    "surface-raised": "#24272e",
+    "border": "#2f333b",
+    "text": "#e8e9ec",
+    "text-muted": "#8b909a",
+    "accent": "#7cc4a4",
+    "accent-text": "#0d1512",
+    "speaking": "#7cc4a4",
+    "danger": "#e5736b",
+    "warning": "#e3b75c"
+  }
+}
