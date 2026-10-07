@@ -8,16 +8,11 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Now
 
-- [ ] S0: Skeleton — Cargo workspace (`crates/*`), `xtask` with `check` (fmt, clippy -D
-      warnings, test, UI typecheck), `engine-protocol` + `dsp` crates, `.cargo/config.toml`
-      alias `xtask`
+- [ ] S0 rest: run `tauri dev` / `tauri build` once on Windows and once on the MacBook; replace
+      the placeholder icon
 
 ## Next
 
-- [ ] S0: `apps/desktop` — Tauri 2 + Svelte 5 + Vite + TS, ui-tokens → CSS variables, empty
-      window with channel list / speakers / mic bar
-- [ ] S0: CI — GitHub Actions matrix windows-latest + macos-latest running `cargo xtask check`
-      (needs a remote, see open questions)
 - [ ] S1 prep: `infra/livekit/dev.yml` + `cargo xtask livekit` (local LiveKit, dev keys)
 - [ ] S1: PoC — engine CLI, two clients hear each other via local LiveKit; loopback-click
       latency, packet loss, reconnect with pulled cable → `docs/spikes/s1-poc.md`
@@ -34,10 +29,19 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Open questions
 
-- Remote: separate GitHub repo (e.g. `crisin/yappa-b`) or keep local until S1 works?
-- License: MIT/Apache (no VST3) — same open decision as variant A.
+- Remote: stays local for now (2026-10-07); the user moves it to GitHub later. CI
+  (`.github/workflows/check.yml`) starts working then.
+- License: MIT/Apache (no VST3) — same open decision as variant A. Cargo metadata says
+  `MIT OR Apache-2.0` provisionally.
 
 ## Done
 
+- [x] S0: CI workflow — windows + macos matrix running `cargo xtask check --ci` (dormant
+      until a remote exists) (2026-10-07)
+- [x] S0: `apps/desktop` — Tauri 2 + Svelte 5 + Vite + TS shell, engine stub, ui-tokens →
+      tokens.css, one-window UI (2026-10-07)
+- [x] S0: Cargo workspace, `cargo xtask check|gen-types|tokens`, `engine-protocol`,
+      `api-types`, `dsp` (biquad) (2026-10-07)
+- [x] ADR-002: alternatives to Rust checked — Rust stays (2026-10-07)
 - [x] Repository created: git, planning baseline, ADR-001 (variant B stack), docs skeleton
       (2026-10-07)

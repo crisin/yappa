@@ -84,12 +84,19 @@ TASKS.md                 the board of this variant
 ## Commands (grow with the skeleton)
 
 ```bash
-cargo xtask check        # fmt --check, clippy -D warnings, test, UI typecheck — from S0 on
-cargo xtask gen-types    # engine-protocol + api-types -> apps/desktop/src/lib/types
+cargo xtask check        # the gate: fmt --check, tokens, svelte-check, clippy -D warnings, tests
+                         # (installs apps/desktop node_modules if missing; --ci = CI mode,
+                         # also fails if generated files differ from the commit)
+cargo xtask gen-types    # engine-protocol + api-types -> apps/desktop/src/lib/types/*.ts
+cargo xtask tokens       # ui-tokens/*.json -> apps/desktop/src/lib/tokens.css
+npm --prefix apps/desktop run tauri dev   # desktop client (Vite on :1420 + Rust shell)
+npm --prefix apps/desktop run dev         # UI only in a browser; lib/engine.ts mocks the engine
 cargo xtask livekit      # local LiveKit (docker) with dev keys — from S1 on
 cargo run -p control     # control plane locally (SQLite file in ./data) — from S6 on
-npm --prefix apps/desktop run tauri dev   # desktop client — from S0 on
 ```
+
+Generated and committed: `apps/desktop/src/lib/types/*.ts` (ts-rs, written by `cargo test`)
+and `apps/desktop/src/lib/tokens.css`. Never edit them by hand.
 
 ## Git & Logbook
 
