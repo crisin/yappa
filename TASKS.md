@@ -36,6 +36,9 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Done
 
+- [x] Dev setup: pinned toolchain, `cargo xtask setup|doctor|test|bench|coverage|hook`,
+      nextest, cargo-deny, insta + proptest + criterion, vitest + Testing Library + prettier,
+      git hooks, Claude Code settings/hooks/skills/agent, `docs/dev-setup.md` (2026-10-07)
 - [x] S0: CI workflow — windows + macos matrix running `cargo xtask check --ci` (dormant
       until a remote exists) (2026-10-07)
 - [x] S0: `apps/desktop` — Tauri 2 + Svelte 5 + Vite + TS shell, engine stub, ui-tokens →

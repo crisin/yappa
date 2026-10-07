@@ -56,7 +56,8 @@ TASKS.md                 the board of this variant
    per OS via `cfg`. A missing implementation hides or degrades the feature — it never breaks
    the build or the call.
 4. **Cargo first.** Repo tasks are `xtask` subcommands (Rust), never bash- or
-   PowerShell-only scripts. npm exists only inside `apps/desktop`.
+   PowerShell-only scripts. npm exists only inside `apps/desktop`. The only shell files are
+   the one-line git hooks in `.githooks/` (git runs them with its own `sh` everywhere).
 5. **Anything touching the send chain** gets a latency and CPU measurement before and after.
    Latency budget mouth-to-ear: 70–120 ms.
 6. **No secrets in the repo** (it may go public). LiveKit keys and signing keys only in
@@ -81,22 +82,31 @@ TASKS.md                 the board of this variant
 - One line in `CHANGELOG.md` (Unreleased), task moved to "Done" in `TASKS.md`
 - Architecture change → an ADR in `docs/adr/` (context, decision, consequences — one page)
 
-## Commands (grow with the skeleton)
+## Commands and tests
+
+Full reference: [`docs/dev-setup.md`](docs/dev-setup.md). The daily loop:
 
 ```bash
-cargo xtask check        # the gate: fmt --check, tokens, svelte-check, clippy -D warnings, tests
-                         # (installs apps/desktop node_modules if missing; --ci = CI mode,
-                         # also fails if generated files differ from the commit)
-cargo xtask gen-types    # engine-protocol + api-types -> apps/desktop/src/lib/types/*.ts
-cargo xtask tokens       # ui-tokens/*.json -> apps/desktop/src/lib/tokens.css
-npm --prefix apps/desktop run tauri dev   # desktop client (Vite on :1420 + Rust shell)
+cargo xtask check          # the gate — must be green before every commit you propose
+cargo xtask check --fast   # quick subset (also the git pre-commit hook)
+cargo xtask test           # Rust (nextest + doctests) + UI (vitest) only
+cargo xtask gen-types      # after changing engine-protocol / api-types
+cargo xtask tokens         # after changing ui-tokens/
+cargo insta review         # after an intended snapshot change
+cargo xtask bench          # DSP cost per 10 ms block (send-chain changes: before/after)
+npm --prefix apps/desktop run tauri dev   # the desktop app
 npm --prefix apps/desktop run dev         # UI only in a browser; lib/engine.ts mocks the engine
-cargo xtask livekit      # local LiveKit (docker) with dev keys — from S1 on
-cargo run -p control     # control plane locally (SQLite file in ./data) — from S6 on
 ```
 
-Generated and committed: `apps/desktop/src/lib/types/*.ts` (ts-rs, written by `cargo test`)
-and `apps/desktop/src/lib/tokens.css`. Never edit them by hand.
+Which test for what: unit tests next to the code; `proptest` for invariants; `insta`
+snapshots (rounded, platform-stable) for responses and tables; `criterion` benches for the
+send chain; vitest + Testing Library for UI. Generated files (`apps/desktop/src/lib/types/*`
+incl. `defaultSettings.json`, `tokens.css`) are written by xtask and committed — never edit
+them; Claude Code is denied write access to them.
+
+Claude Code setup in `.claude/`: a SessionStart hook prints the current tasks, a PostToolUse
+hook formats edited files, skills `task` / `adr` / `spike`, agent `realtime-reviewer` (run it
+after touching engine, DSP or transport code).
 
 ## Git & Logbook
 

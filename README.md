@@ -23,6 +23,7 @@ Why and what follows from it: [ADR-001](docs/adr/001-variante-b-stack.md).
 - [docs/00-grobstruktur.md](docs/00-grobstruktur.md) — the planning baseline (German, ADR-000)
 - [docs/adr/](docs/adr/README.md) — architecture decisions
 - [docs/spikes/](docs/spikes/README.md) — spike goals and results
+- [docs/dev-setup.md](docs/dev-setup.md) — tooling, tests, Claude Code setup
 - [TASKS.md](TASKS.md) — what is being worked on
 - [CHANGELOG.md](CHANGELOG.md) · [CLAUDE.md](CLAUDE.md) — rules for coding agents
 
@@ -38,6 +39,9 @@ Prerequisites: Rust stable (rustup), Node 20+, Tauri 2 prerequisites (Windows: W
 MSVC Build Tools; macOS: Xcode CLT); Docker Desktop for local LiveKit from S1 on.
 
 ```bash
-cargo xtask check                         # everything green? (installs UI deps on first run)
+cargo xtask setup                         # dev tools, npm deps, git hooks (once per machine)
+cargo xtask check                         # everything green?
 npm --prefix apps/desktop run tauri dev   # the desktop app
 ```
+
+Tooling, tests and the Claude Code setup: [docs/dev-setup.md](docs/dev-setup.md).
