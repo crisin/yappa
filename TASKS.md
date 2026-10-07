@@ -9,7 +9,7 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 ## Now
 
 - [ ] S0 rest: on the MacBook `cargo xtask setup` + `check` + `build` (.app/.dmg); click
-      through `cargo xtask dev` on both machines; replace the placeholder icon
+      through `cargo xtask dev` there
 
 ## Next
 
@@ -31,11 +31,15 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 - Remote: stays local for now (2026-10-07); the user moves it to GitHub later. CI
   (`.github/workflows/check.yml`) starts working then.
+- Logo: the cat (2026-10-07) is a "for now" logo of unknown origin — clarify the rights or
+  replace it before the repo goes public.
 - License: MIT/Apache (no VST3) — same open decision as variant A. Cargo metadata says
   `MIT OR Apache-2.0` provisionally.
 
 ## Done
 
+- [x] Logo "for now": cat as app icon set, sidebar logo and favicon; `cargo xtask dev`
+      checked on Windows by the user (2026-10-07)
 - [x] Dev/prod build commands: `cargo xtask dev|build`, npm `app:*` scripts, release profile,
       bundle config, READMEs (2026-10-07)
 - [x] Dev setup: pinned toolchain, `cargo xtask setup|doctor|test|bench|coverage|hook`,

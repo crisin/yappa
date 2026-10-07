@@ -3,6 +3,7 @@
   // mic and PTT state at the bottom. Channels are placeholders until the control plane (S6).
   import { onMount } from 'svelte';
   import { engine } from './lib/engine';
+  import logo from './assets/logo.png';
   import type { TransmitMode } from './lib/types/TransmitMode';
 
   const channels = [
@@ -59,7 +60,7 @@
 
 <div class="shell">
   <nav class="channels" aria-label="Channels">
-    <header>yAPPA</header>
+    <header><img src={logo} alt="" width="28" height="28" />yAPPA</header>
     {#each channels as channel (channel.id)}
       <button
         class="channel"
@@ -118,9 +119,16 @@
   }
 
   .channels header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     font-size: var(--font-size-lg);
     font-weight: 700;
     padding: var(--space-2) var(--space-2) var(--space-4);
+  }
+
+  .channels header img {
+    border-radius: var(--radius-md);
   }
 
   .channel {

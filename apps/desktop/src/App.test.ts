@@ -3,8 +3,9 @@ import { describe, expect, it } from 'vitest';
 import App from './App.svelte';
 
 describe('App', () => {
-  it('lists the channels and opens the first one', () => {
-    render(App);
+  it('shows the logo and lists the channels, first one open', () => {
+    const { container } = render(App);
+    expect(container.querySelector('header img')).toHaveAttribute('src');
     expect(screen.getByRole('navigation', { name: 'Channels' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Lobby');
   });
