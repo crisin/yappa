@@ -23,6 +23,8 @@
   let mode = $state<TransmitMode>('voiceActivation');
   let theme = $state('dark');
   let protocol = $state<number | null>(null);
+  // Controls appear only after the settings arrived, so a late load cannot overwrite a click.
+  let loaded = $state(false);
 
   onMount(async () => {
     const info = await engine.info();
@@ -30,6 +32,7 @@
     const settings = await engine.settings();
     mode = settings.transmitMode;
     theme = settings.theme;
+    loaded = true;
   });
 
   $effect(() => {
@@ -75,18 +78,21 @@
   </main>
 
   <footer class="bar">
-    <div class="group" role="group" aria-label="Senden">
-      {#each modes as m (m.id)}
-        <button aria-pressed={mode === m.id} onclick={() => setMode(m.id)}>{m.label}</button>
-      {/each}
-    </div>
-    <div class="group">
-      <button aria-pressed={muted} onclick={toggleMute}>{muted ? 'Mikro aus' : 'Mikro an'}</button>
-      <button aria-pressed={deafened} onclick={toggleDeafen}>
-        {deafened ? 'Taub' : 'Hören'}
-      </button>
-      <button onclick={() => (theme = theme === 'dark' ? 'light' : 'dark')}>Theme</button>
-    </div>
+    {#if loaded}
+      <div class="group" role="group" aria-label="Senden">
+        {#each modes as m (m.id)}
+          <button aria-pressed={mode === m.id} onclick={() => setMode(m.id)}>{m.label}</button>
+        {/each}
+      </div>
+      <div class="group">
+        <button aria-pressed={muted} onclick={toggleMute}>{muted ? 'Mikro aus' : 'Mikro an'}</button
+        >
+        <button aria-pressed={deafened} onclick={toggleDeafen}>
+          {deafened ? 'Taub' : 'Hören'}
+        </button>
+        <button onclick={() => (theme = theme === 'dark' ? 'light' : 'dark')}>Theme</button>
+      </div>
+    {/if}
     <span class="meta">
       {protocol === null ? '…' : protocol === 0 ? 'Browser-Modus' : `Protokoll v${protocol}`}
     </span>
