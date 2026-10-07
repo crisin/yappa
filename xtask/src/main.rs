@@ -1,5 +1,7 @@
 //! Repo tasks, cross-platform, no shell scripts: `cargo xtask <command>`.
 //!
+//!   dev [--ui]         run the desktop app (Tauri dev, hot reload); --ui = UI only in a browser
+//!   build [--debug]    production build: installers for this OS (NSIS + MSI / .app + DMG)
 //!   setup              install missing dev tools, npm deps, git hooks + commit template
 //!   doctor             show which tools are there, which are missing, how to get them
 //!   check [--fast|--ci] the gate (see `check`); --fast = pre-commit subset,
@@ -30,6 +32,8 @@ fn main() -> ExitCode {
     let flag = |f: &str| args.iter().any(|a| a == f);
     let root = repo_root();
     let result = match args.first().map(String::as_str) {
+        Some("dev") => dev(&root, flag("--ui")),
+        Some("build") => build(&root, flag("--debug")),
         Some("setup") => tools::setup(&root),
         Some("doctor") => tools::doctor(&root),
         Some("check") => check(&root, flag("--ci"), flag("--fast")),
@@ -41,8 +45,9 @@ fn main() -> ExitCode {
         Some("hook") => hook::run(&root, args.get(1).map(String::as_str)),
         _ => {
             eprintln!(
-                "usage: cargo xtask <setup | doctor | check [--fast|--ci] | test | gen-types \
-                 | tokens | bench | coverage | hook <post-edit|session-start>>"
+                "usage: cargo xtask <dev [--ui] | build [--debug] | setup | doctor \
+                 | check [--fast|--ci] | test | gen-types | tokens | bench | coverage \
+                 | hook <post-edit|session-start>>"
             );
             return ExitCode::from(2);
         }
@@ -101,6 +106,46 @@ fn check(root: &Path, ci: bool, fast: bool) -> Result {
         step("generated files committed", || generated_clean(root))?;
     }
     println!("\n✔ check passed{}", if fast { " (fast)" } else { "" });
+    Ok(())
+}
+
+fn dev(root: &Path, ui_only: bool) -> Result {
+    ensure_node_modules(root, false)?;
+    tokens::generate(root)?;
+    let script = if ui_only { "dev" } else { "app:dev" };
+    npm(&root.join(DESKTOP), &["run", script])
+}
+
+/// Release build + installers. Tauri runs `npm run build` (Vite) first and writes the
+/// bundles to target/<profile>/bundle/<kind>/.
+fn build(root: &Path, debug: bool) -> Result {
+    ensure_node_modules(root, false)?;
+    tokens::generate(root)?;
+    let script = if debug {
+        "app:build:debug"
+    } else {
+        "app:build"
+    };
+    step("tauri build", || npm(&root.join(DESKTOP), &["run", script]))?;
+
+    let profile = if debug { "debug" } else { "release" };
+    let bundle_dir = root.join("target").join(profile).join("bundle");
+    println!("\ninstallers:");
+    let kinds =
+        std::fs::read_dir(&bundle_dir).map_err(|e| format!("{}: {e}", bundle_dir.display()))?;
+    for kind in kinds.flatten() {
+        let Ok(files) = std::fs::read_dir(kind.path()) else {
+            continue;
+        };
+        for file in files.flatten().map(|f| f.path()) {
+            let ext = file.extension().and_then(|e| e.to_str()).unwrap_or("");
+            if matches!(ext, "exe" | "msi" | "dmg" | "app") {
+                let mb = std::fs::metadata(&file).map(|m| m.len()).unwrap_or(0) as f64 / 1e6;
+                let rel = file.strip_prefix(root).unwrap_or(&file);
+                println!("  {}  ({mb:.1} MB)", rel.display());
+            }
+        }
+    }
     Ok(())
 }
 

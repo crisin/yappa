@@ -39,6 +39,10 @@ Docker, `lk` and `gh` come from the OS package manager (winget / brew).
 
 | Command | Does |
 | --- | --- |
+| `cargo xtask dev` | desktop app with hot reload (`tauri dev`) |
+| `cargo xtask dev --ui` | UI only in the browser on :1420, engine mocked |
+| `cargo xtask build` | production build: release profile (thin LTO, stripped) + installers, lists them with size |
+| `cargo xtask build --debug` | installer from the debug profile |
 | `cargo xtask check` | the gate: fmt, tokens, prettier, svelte-check, clippy `-D warnings`, nextest + doctests, vitest, cargo-deny |
 | `cargo xtask check --fast` | pre-commit subset: fmt, tokens, prettier, clippy |
 | `cargo xtask check --ci` | full + `npm ci` + fails if generated files are not committed |
@@ -48,6 +52,12 @@ Docker, `lk` and `gh` come from the OS package manager (winget / brew).
 | `cargo xtask bench` | criterion: DSP cost per 10 ms block |
 | `cargo xtask coverage` | line coverage, opens the HTML report |
 | `cargo xtask doctor` / `setup` | see above |
+
+Build profiles (root `Cargo.toml`): in **dev**, all dependencies and the `dsp` crate are
+optimised (`opt-level` 2/3) while our own crates stay debuggable — debug-speed DSP would make
+audio impossible to judge by ear. **release** uses `codegen-units = 1`, thin LTO and strips
+symbols. The app version has one source: `[workspace.package] version` in `Cargo.toml`
+(`tauri.conf.json` has no version of its own).
 
 Git hooks (`.githooks`, activated by `setup` via `core.hooksPath`): **pre-commit** runs
 `check --fast`, **pre-push** the full `check`.
