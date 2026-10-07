@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CARGO_TERM_COLOR": "never",
+    "NO_COLOR": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(cargo xtask:*)",
+      "Bash(cargo build:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo clippy:*)",
+      "Bash(cargo fmt:*)",
+      "Bash(cargo test:*)",
+      "Bash(cargo nextest:*)",
+      "Bash(cargo insta:*)",
+      "Bash(cargo bench:*)",
+      "Bash(cargo tree:*)",
+      "Bash(cargo deny:*)",
+      "Bash(cargo run:*)",
+      "Bash(cargo search:*)",
+      "Bash(cargo info:*)",
+      "Bash(npm --prefix apps/desktop run:*)",
+      "Bash(npm run:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npx svelte-check:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git switch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git stash:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)",
+      "Bash(cargo add:*)",
+      "Bash(npm install:*)"
+    ],
+    "deny": [
+      "Edit(apps/desktop/src/lib/types/**)",
+      "Write(apps/desktop/src/lib/types/**)",
+      "Edit(apps/desktop/src/lib/tokens.css)",
+      "Write(apps/desktop/src/lib/tokens.css)",
+      "Read(.env)",
+      "Read(.env.*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "cargo xtask hook session-start", "timeout": 120 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{ "type": "command", "command": "cargo xtask hook post-edit", "timeout": 60 }]
+      }
+    ]
+  }
+}
