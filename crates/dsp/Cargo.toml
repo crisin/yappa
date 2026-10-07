@@ -6,5 +6,18 @@ edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
+# Only criterion runs under `cargo bench` (libtest would reject criterion's flags).
+[lib]
+bench = false
+
+[dev-dependencies]
+insta.workspace = true
+proptest.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "block"
+harness = false
+
 [lints]
 workspace = true

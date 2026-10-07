@@ -1,0 +1,13 @@
+---
+source: crates/dsp/tests/response.rs
+expression: "response(BiquadKind::HighPass, 80.0, 0.707)"
+---
+     20 Hz   -24.1 dB
+     50 Hz    -8.8 dB
+     80 Hz    -3.0 dB
+    200 Hz    -0.1 dB
+   1000 Hz    +0.0 dB
+   3000 Hz    +0.0 dB
+   6000 Hz    +0.0 dB
+  12000 Hz    +0.0 dB
+  20000 Hz    +0.0 dB
