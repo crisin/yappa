@@ -94,8 +94,8 @@ cargo xtask gen-types      # after changing engine-protocol / api-types
 cargo xtask tokens         # after changing ui-tokens/
 cargo insta review         # after an intended snapshot change
 cargo xtask bench          # DSP cost per 10 ms block (send-chain changes: before/after)
-npm --prefix apps/desktop run tauri dev   # the desktop app
-npm --prefix apps/desktop run dev         # UI only in a browser; lib/engine.ts mocks the engine
+cargo xtask dev           # the desktop app (hot reload); --ui = browser only, engine mocked
+cargo xtask build         # production build + installers (target/release/bundle/)
 ```
 
 Which test for what: unit tests next to the code; `proptest` for invariants; `insta`

@@ -19,6 +19,20 @@ insta = "1.49"
 proptest = "1.11"
 criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
 
+# Dev: our crates stay debuggable, dependencies and the DSP crate are optimised — otherwise
+# real-time audio (and DeepFilterNet later) is too slow in debug builds to judge by ear.
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.dev.package.dsp]
+opt-level = 3
+
+# Release = what ships to the gang: speed over build time.
+[profile.release]
+codegen-units = 1
+lto = "thin"
+strip = true
+
 [workspace.lints.rust]
 unsafe_code = "deny"
 

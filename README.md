@@ -35,13 +35,34 @@ Why Rust and not something else: [ADR-002](docs/adr/002-language-alternatives.md
 
 ## Quickstart
 
-Prerequisites: Rust stable (rustup), Node 20+, Tauri 2 prerequisites (Windows: WebView2 +
-MSVC Build Tools; macOS: Xcode CLT); Docker Desktop for local LiveKit from S1 on.
+Prerequisites: Rust via rustup (the version is pinned in `rust-toolchain.toml` and installed
+automatically), Node 20+, the Tauri 2 prerequisites (Windows: WebView2 + MSVC Build Tools;
+macOS: Xcode Command Line Tools), Docker Desktop for local LiveKit from S1 on.
 
 ```bash
-cargo xtask setup                         # dev tools, npm deps, git hooks (once per machine)
-cargo xtask check                         # everything green?
-npm --prefix apps/desktop run tauri dev   # the desktop app
+cargo xtask setup     # once per machine: dev tools, npm deps, git hooks, then a tool report
+cargo xtask check     # the gate: format, lint, types, all tests, licenses
 ```
 
-Tooling, tests and the Claude Code setup: [docs/dev-setup.md](docs/dev-setup.md).
+## Develop
+
+```bash
+cargo xtask dev       # desktop app with hot reload (Vite for the UI, Rust rebuilds on change)
+cargo xtask dev --ui  # UI only in the browser (http://localhost:1420), engine is mocked
+cargo xtask test      # Rust + UI tests
+```
+
+## Build (production)
+
+```bash
+cargo xtask build          # release build + installers for the OS you are on
+cargo xtask build --debug  # same, debug profile (faster, for testing the installer)
+```
+
+Windows produces `target/release/bundle/nsis/*-setup.exe` (per-user install, no admin) and
+`target/release/bundle/msi/*.msi`; macOS produces `target/release/bundle/macos/*.app` and
+`target/release/bundle/dmg/*.dmg`. Builds are unsigned for now — SmartScreen / Gatekeeper
+warn once. Signing, update channels (nightly/beta/stable) and the updater come with phase 2.
+
+All commands, tools, test kinds and the Claude Code setup: [docs/dev-setup.md](docs/dev-setup.md).
+The same commands also exist as npm scripts in [apps/desktop](apps/desktop/README.md).

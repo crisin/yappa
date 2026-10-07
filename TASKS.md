@@ -8,8 +8,8 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Now
 
-- [ ] S0 rest: run `tauri dev` / `tauri build` once on Windows and once on the MacBook; replace
-      the placeholder icon
+- [ ] S0 rest: on the MacBook `cargo xtask setup` + `check` + `build` (.app/.dmg); click
+      through `cargo xtask dev` on both machines; replace the placeholder icon
 
 ## Next
 
@@ -36,6 +36,8 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Done
 
+- [x] Dev/prod build commands: `cargo xtask dev|build`, npm `app:*` scripts, release profile,
+      bundle config, READMEs (2026-10-07)
 - [x] Dev setup: pinned toolchain, `cargo xtask setup|doctor|test|bench|coverage|hook`,
       nextest, cargo-deny, insta + proptest + criterion, vitest + Testing Library + prettier,
       git hooks, Claude Code settings/hooks/skills/agent, `docs/dev-setup.md` (2026-10-07)
