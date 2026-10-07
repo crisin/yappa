@@ -1,0 +1,17 @@
+[package]
+name = "api-types"
+description = "Client <-> control-plane DTOs. TS types via ts-rs."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+ts-rs.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

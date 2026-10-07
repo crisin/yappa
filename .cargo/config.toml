@@ -1,0 +1,6 @@
+[alias]
+xtask = "run --quiet -p xtask --"
+
+[env]
+# ts-rs writes the generated TypeScript here when `cargo test` runs (cargo xtask gen-types).
+TS_RS_EXPORT_DIR = { value = "apps/desktop/src/lib/types", relative = true }
