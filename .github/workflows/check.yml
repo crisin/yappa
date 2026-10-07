@@ -11,6 +11,9 @@ concurrency:
   group: check-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   check:
     strategy:
@@ -20,10 +23,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
+      # rustup is preinstalled; rust-toolchain.toml selects the pinned version + components.
+      - name: Rust toolchain (from rust-toolchain.toml)
+        run: rustup show active-toolchain
       - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest,cargo-deny,cargo-insta
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -31,3 +37,6 @@ jobs:
           cache-dependency-path: apps/desktop/package-lock.json
       - name: cargo xtask check --ci
         run: cargo xtask check --ci
+        env:
+          # insta: fail on snapshot mismatch instead of writing .snap.new files
+          CI: true

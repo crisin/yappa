@@ -1,0 +1,6 @@
+# Same compiler and lints on the Windows PC, the MacBook and CI.
+# Bump deliberately (own commit), then run `cargo xtask check`.
+[toolchain]
+channel = "1.97.1"
+components = ["clippy", "rustfmt", "llvm-tools-preview"]
+profile = "minimal"

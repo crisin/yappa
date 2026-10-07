@@ -1,0 +1,3 @@
+#!/bin/sh
+# Run by git itself (on Windows via Git's bundled sh). The logic lives in xtask.
+exec cargo xtask check
