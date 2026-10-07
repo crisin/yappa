@@ -1,0 +1,13 @@
+# <type>(<scope>): <what changed — imperative, max 72 chars>
+#
+# Why:       the problem or motivation — what was wrong or missing,
+#            how it showed up
+# What:      the change itself, key decisions, rejected alternatives
+# Verified:  how it was checked (check, test, measurement) — or
+#            "not verified" plus the reason
+# Follow-up: open ends, known limitations, next steps (omit if none)
+#
+# Types:  feat fix refactor docs chore test perf build ci
+# Scopes: a crate or app name (dsp, audio-engine, transport, control,
+#         desktop, xtask, infra) or docs. One logical change per commit.
+# The git history is the logbook — see CLAUDE.md, "Git & Logbook".
