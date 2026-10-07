@@ -290,6 +290,22 @@ mod tests {
         assert_eq!(s, back);
     }
 
+    /// Writes `Settings::default()` next to the generated TS types, so the UI uses the real
+    /// defaults instead of a hand-copied mock (runs with `cargo xtask gen-types` / tests).
+    #[test]
+    fn export_default_settings_json() {
+        let Some(dir) = std::env::var_os("TS_RS_EXPORT_DIR") else {
+            return;
+        };
+        let json = serde_json::to_string_pretty(&Settings::default()).unwrap()
+            + "
+";
+        let path = std::path::Path::new(&dir).join("defaultSettings.json");
+        if std::fs::read_to_string(&path).ok().as_deref() != Some(json.as_str()) {
+            std::fs::write(path, json).unwrap();
+        }
+    }
+
     #[test]
     fn validate_rejects_out_of_range_bitrate() {
         let s = Settings {

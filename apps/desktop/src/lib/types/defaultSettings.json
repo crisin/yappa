@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "inputDevice": null,
+  "outputDevice": null,
+  "transmitMode": "voiceActivation",
+  "vadThresholdDb": -50.0,
+  "vadHoldMs": 300,
+  "denoiser": "deepFilter",
+  "highPassHz": 80.0,
+  "eq": [],
+  "compressor": {
+    "enabled": true,
+    "thresholdDb": -18.0,
+    "ratio": 3.0,
+    "attackMs": 5.0,
+    "releaseMs": 120.0,
+    "makeupDb": 3.0
+  },
+  "voiceBitrateKbps": 80,
+  "theme": "dark"
+}

@@ -1,0 +1,6 @@
+# generated (cargo xtask gen-types / tokens) or build output
+src/lib/types/
+src/lib/tokens.css
+dist/
+src-tauri/
+package-lock.json
