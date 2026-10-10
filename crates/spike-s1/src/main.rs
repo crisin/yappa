@@ -6,6 +6,7 @@
 //!   yappa-poc measure [--seconds 30] [--acoustic] [--label text]
 //!
 //! Common: --url ws://localhost:7880  --room poc  --bitrate 64000  --no-red  --dtx
+//!         --token <jwt> (from `cargo xtask livekit token`; replaces the dev-key token)
 //!         --period-ms 500  --threshold 0.1  --noise 0.03 (noise floor under the clicks)
 //!
 //! `join` is one participant: two of them in a room hear each other. `measure` runs two
@@ -91,6 +92,7 @@ impl Args {
             bitrate: self.parsed("--bitrate", 64_000)?,
             red: !self.flag("--no-red"),
             dtx: self.flag("--dtx"),
+            token: self.value("--token").map(String::from),
         })
     }
 }
@@ -117,7 +119,12 @@ fn playout(extra: Vec<PlayoutRing>) -> Result<(audio::Device, Sink)> {
 }
 
 async fn join(args: &Args) -> Result {
-    let identity = args.value("--identity").ok_or("join needs --identity")?;
+    // With a token the server takes the identity from it; the name here only labels the log.
+    let identity = match (args.value("--identity"), args.value("--token")) {
+        (Some(identity), _) => identity,
+        (None, Some(_)) => "me",
+        (None, None) => return Err("join needs --identity or --token".into()),
+    };
     let cfg = args.client(identity)?;
     let period_ms = args.parsed("--period-ms", 500)?;
     let seconds: u64 = args.parsed("--seconds", 0)?;

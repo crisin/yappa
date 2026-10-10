@@ -1,0 +1,36 @@
+# Stage 1: LiveKit + Caddy (TLS) on a Linux home server behind a router.
+# Step by step: docs/homeserver.md. Needs infra/livekit/.env (see .env.example).
+#
+#   docker compose -f home.yml up -d
+#
+# Host networking on purpose: LiveKit must see the real addresses of the machine, and
+# media must not pass through Docker's NAT. This works on Linux only.
+name: yappa-home
+
+services:
+  livekit:
+    image: livekit/livekit-server:v1.13.8
+    command: ["--config=/etc/livekit.yaml"]
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?set LIVEKIT_API_KEY in .env}: ${LIVEKIT_API_SECRET:?set LIVEKIT_API_SECRET in .env}"
+    volumes:
+      - ./livekit.home.yaml:/etc/livekit.yaml:ro
+    network_mode: host
+    restart: unless-stopped
+
+  # Terminates TLS for the signalling connection (wss://) and fetches the certificate
+  # from Let's Encrypt by itself. Needs ports 80 and 443 reachable from the internet.
+  caddy:
+    image: caddy:2.11
+    environment:
+      YAPPA_DOMAIN: "${YAPPA_DOMAIN:?set YAPPA_DOMAIN in .env}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    network_mode: host
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

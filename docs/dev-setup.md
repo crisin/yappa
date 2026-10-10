@@ -57,6 +57,7 @@ Docker, `lk` and `gh` come from the OS package manager (winget / brew).
 | `cargo xtask livekit down` / `logs` | stop it / follow the server log |
 | `cargo xtask livekit loss <percent>` | drop that share of packets in both directions (tc/netem in a sidecar); `0` clears |
 | `cargo xtask livekit cut <seconds>` | drop everything for that long, then restore — the pulled cable |
+| `cargo xtask livekit token <name> [--room gang] [--days 30]` | join token for one person, signed with the keys in `infra/livekit/.env` (dev keys without one) — see [homeserver.md](homeserver.md) |
 | `cargo run --release -p spike-s1 -- measure` | S1 PoC (`yappa-poc`): click latency between two participants; also `devices`, `join --identity <name>` — options at the top of `crates/spike-s1/src/main.rs` |
 
 Windows links the **static C runtime** (`+crt-static` in `.cargo/config.toml`): LiveKit's

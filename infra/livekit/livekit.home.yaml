@@ -1,0 +1,12 @@
+# LiveKit server config, stage 1 (home server behind a router). Keys come from the
+# LIVEKIT_KEYS environment variable (infra/livekit/.env) — never from this file.
+port: 7880 # signalling; only Caddy talks to it, the router does not forward it
+rtc:
+  tcp_port: 7881 # ICE over TCP, the fallback when a client's network blocks UDP
+  # One muxed UDP port for all media: a single port forwarding in the router is enough
+  # for a group of 20.
+  udp_port: 7882
+  # Ask a STUN server for the public IPv4 address and announce that one to the clients.
+  use_external_ip: true
+logging:
+  level: info

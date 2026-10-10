@@ -61,6 +61,9 @@ pub struct ClientConfig {
     pub bitrate: u64,
     pub red: bool,
     pub dtx: bool,
+    /// A token issued elsewhere (`cargo xtask livekit token`); without one the client
+    /// signs its own with the dev keys.
+    pub token: Option<String>,
 }
 
 /// What this participant publishes.
@@ -112,7 +115,10 @@ impl Client {
         sink: Sink,
         log: Arc<Log>,
     ) -> Result<Self> {
-        let token = dev_token(&cfg)?;
+        let token = match &cfg.token {
+            Some(token) => token.clone(),
+            None => dev_token(&cfg)?,
+        };
         let (room, events) = Room::connect(&cfg.url, &token, RoomOptions::default())
             .await
             .map_err(|e| format!("{}: connect to {} failed: {e}", cfg.identity, cfg.url))?;

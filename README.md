@@ -24,6 +24,7 @@ Why and what follows from it: [ADR-001](docs/adr/001-variante-b-stack.md).
 - [docs/adr/](docs/adr/README.md) — architecture decisions
 - [docs/spikes/](docs/spikes/README.md) — spike goals and results
 - [docs/dev-setup.md](docs/dev-setup.md) — tooling, tests, Claude Code setup
+- [docs/homeserver.md](docs/homeserver.md) — LiveKit on a home server behind a FRITZ!Box (German)
 - [TASKS.md](TASKS.md) — what is being worked on
 - [CHANGELOG.md](CHANGELOG.md) · [CLAUDE.md](CLAUDE.md) — rules for coding agents
 
