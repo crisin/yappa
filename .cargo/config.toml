@@ -4,3 +4,11 @@ xtask = "run --quiet -p xtask --"
 [env]
 # ts-rs writes the generated TypeScript here when `cargo test` runs (cargo xtask gen-types).
 TS_RS_EXPORT_DIR = { value = "apps/desktop/src/lib/types", relative = true }
+
+# LiveKit's prebuilt libwebrtc is built against the static C runtime (/MT); everything that
+# links it must match, or the linker fails with LNK2038 "RuntimeLibrary" mismatches.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

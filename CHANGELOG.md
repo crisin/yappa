@@ -4,6 +4,7 @@ One line per finished task (definition of done). Newest first.
 
 ## Unreleased
 
+- S1 PoC: `yappa-poc` (scratch crate `crates/spike-s1`) — cpal ↔ LiveKit Rust SDK, click latency, packet loss, reconnect; result in docs/spikes/s1-poc.md. Windows builds now use the static C runtime (`.cargo/config.toml`), needed by libwebrtc.
 - S1 prep: local LiveKit in Docker (`infra/livekit/dev.yml`) and `cargo xtask livekit up|down|logs|loss <%>|cut <s>` — packet loss and a cut link via tc/netem; `doctor` checks for the MSVC 2022 toolset.
 - Logo (for now): app icons, sidebar logo and favicon from the cat picture.
 - Dev and production build: `cargo xtask dev [--ui]`, `cargo xtask build [--debug]` (installers), npm `app:*` scripts, release/dev profiles, apps/desktop README.

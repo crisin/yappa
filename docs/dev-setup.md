@@ -57,6 +57,12 @@ Docker, `lk` and `gh` come from the OS package manager (winget / brew).
 | `cargo xtask livekit down` / `logs` | stop it / follow the server log |
 | `cargo xtask livekit loss <percent>` | drop that share of packets in both directions (tc/netem in a sidecar); `0` clears |
 | `cargo xtask livekit cut <seconds>` | drop everything for that long, then restore — the pulled cable |
+| `cargo run --release -p spike-s1 -- measure` | S1 PoC (`yappa-poc`): click latency between two participants; also `devices`, `join --identity <name>` — options at the top of `crates/spike-s1/src/main.rs` |
+
+Windows links the **static C runtime** (`+crt-static` in `.cargo/config.toml`): LiveKit's
+prebuilt libwebrtc is built that way and the linker refuses a mix (LNK2038). The first build
+downloads libwebrtc (a few hundred MB) into `target/`; if that step fails once with "access
+denied" while moving the extracted files, run the build again.
 
 Build profiles (root `Cargo.toml`): in **dev**, all dependencies and the `dsp` crate are
 optimised (`opt-level` 2/3) while our own crates stay debuggable — debug-speed DSP would make
