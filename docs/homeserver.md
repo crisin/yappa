@@ -131,19 +131,23 @@ docker compose -f home.yml logs caddy | tail -20
 - **Von außen:** Am Handy WLAN ausschalten und `https://<YAPPA_DOMAIN>` im Browser öffnen.
   Erscheint `OK` ohne Zertifikatswarnung, steht die Anmeldung.
 
-## 7. Erster Test mit dem PoC-Client
+## 7. Erster Test
 
-Auf dem Entwicklungs-PC dieselbe `.env` nach `infra/livekit/.env` legen (damit die Tokens
-mit dem Schlüssel des Servers signiert werden), dann:
+Auf dem Entwicklungs-PC dieselbe `.env` nach `infra/livekit/.env` legen (damit die
+Einladungen mit dem Schlüssel des Servers signiert werden), dann:
 
 ```bash
-cargo xtask livekit token chris                # gibt das Token aus
-cargo run --release -p spike-s1 -- join --url wss://<YAPPA_DOMAIN> --token <token>
+cargo xtask livekit token chris     # gibt die Einladung aus: eine Zeile, beginnt mit yappa1.
+cargo xtask dev                     # die App starten, Einladung einfügen, "Beitreten"
 ```
 
-Steht dort `joined room 'gang'`, funktioniert die Anmeldung. Für einen zweiten Teilnehmer
-ein zweites Token ausstellen und z. B. auf einem Laptop am Handy-Hotspot beitreten: sobald
-`hears <name>` erscheint, läuft die Sprache über deinen Anschluss.
+Steht unten „Verbunden", funktioniert die Anmeldung. Für einen zweiten Teilnehmer eine
+zweite Einladung ausstellen und z. B. auf einem Laptop am Handy-Hotspot beitreten: sobald
+ihr euch seht und hört, läuft die Sprache über deinen Anschluss. Im Debug-Bereich der App
+stehen Laufzeit, Paketverlust und Jitterbuffer.
+
+Ohne Fenster geht es auch, z. B. um nur den Server zu prüfen:
+`cargo run --release -p yappa-desktop --example headless -- --invite <einladung>`.
 
 Aus dem eigenen Heimnetz heraus geht die Verbindung einmal zur FRITZ!Box und wieder zurück.
 Das klappt normalerweise; wenn nicht, zuerst von außen (Hotspot) testen, bevor du am Server
@@ -151,13 +155,14 @@ suchst.
 
 ## 8. Die Gang einladen
 
-Bis es den Test-Client mit Oberfläche gibt, bekommt jede Person zwei Dinge:
+Jede Person bekommt zwei Dinge und die Anleitung [mittesten.md](mittesten.md):
 
-1. `target/release/yappa-poc.exe` (eine einzelne Datei, kein Installer; Windows warnt beim
-   ersten Start vor der unbekannten Datei).
-2. Ein eigenes Token: `cargo xtask livekit token <name> --days 30`.
+1. Den Installer: `cargo xtask build` legt ihn unter `target/release/bundle/nsis/` ab
+   (Windows warnt beim ersten Start, weil er nicht signiert ist).
+2. Eine eigene Einladung: `cargo xtask livekit token <name> --days 30`. Der Name ist der,
+   unter dem die Person im Raum erscheint; jede Einladung nur einmal vergeben.
 
-Ein Token ist der Zugang: wer es hat, kommt bis zum Ablaufdatum in den Raum `gang`. Einzeln
+Eine Einladung ist der Zugang: wer sie hat, kommt bis zum Ablaufdatum in den Raum `gang`. Einzeln
 zurückziehen lässt es sich nicht — nur alle auf einmal, indem du auf dem Server neue
 Schlüssel erzeugst (Schritt 5) und neu startest. Die Control-Plane (S6) ersetzt das später
 durch Einladungslinks.
@@ -180,8 +185,9 @@ Beide Container starten nach einem Neustart der VM von selbst (`restart: unless-
 | --- | --- | --- |
 | Caddy bekommt kein Zertifikat | Port 80 kommt nicht an, oder die Adresse zeigt per IPv6 auf die FRITZ!Box | Freigabe TCP 80; `YAPPA_DOMAIN` ist die Adresse der **VM**, nicht der Box |
 | `https://…` von außen nicht erreichbar | DS-Lite, oder Freigabe 443 fehlt | Schritt 1 und 4 |
-| Client: `401 Unauthorized - invalid API key` | Token mit anderen Schlüsseln signiert | `.env` auf Server und Entwicklungs-PC müssen gleich sein |
-| Client: `500` direkt nach dem Serverstart | Server noch nicht bereit | ein paar Sekunden warten |
+| App: „could not connect … 401 Unauthorized" | Einladung mit anderen Schlüsseln signiert oder abgelaufen | `.env` auf Server und Entwicklungs-PC müssen gleich sein |
+| App: „… 500" direkt nach dem Serverstart | Server noch nicht bereit | ein paar Sekunden warten |
+| Jemand fliegt immer wieder raus | dieselbe Einladung läuft auf zwei Rechnern | pro Person und Rechner eine eigene Einladung |
 | Beitritt klappt, aber niemand hört sich | UDP 7882 kommt nicht an | Freigabe UDP 7882; `nodeIP` im LiveKit-Log ist die öffentliche Adresse |
 | Ein Einzelner hört nichts, die anderen schon | sein Netz sperrt UDP | Freigabe TCP 7881 muss stehen |
 | Geht von außen, aber nicht aus dem eigenen WLAN | Rückweg über die FRITZ!Box | über Hotspot gegenprüfen |

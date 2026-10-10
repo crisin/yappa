@@ -25,13 +25,16 @@ Why and what follows from it: [ADR-001](docs/adr/001-variante-b-stack.md).
 - [docs/spikes/](docs/spikes/README.md) — spike goals and results
 - [docs/dev-setup.md](docs/dev-setup.md) — tooling, tests, Claude Code setup
 - [docs/homeserver.md](docs/homeserver.md) — LiveKit on a home server behind a FRITZ!Box (German)
+- [docs/mittesten.md](docs/mittesten.md) — for testers: install, join, report a problem (German)
 - [TASKS.md](TASKS.md) — what is being worked on
 - [CHANGELOG.md](CHANGELOG.md) · [CLAUDE.md](CLAUDE.md) — rules for coding agents
 
 ## Status
 
-S0 skeleton (2026-10-07): Cargo workspace, contracts with generated TS, `dsp` biquad,
-Tauri 2 + Svelte 5 shell with an engine stub. No audio yet — that is S1. Local repo only.
+Test client (2026-10-10): the desktop app joins a LiveKit room with a pasted invite — real
+audio engine (cpal ↔ LiveKit Rust SDK, RED), who is there and who speaks, per-person volume,
+device choice, a debug panel with live statistics, structured logs with export. Not yet:
+login and channels (S6), noise reduction and push-to-talk (S2/S3), updater. Local repo only.
 Why Rust and not something else: [ADR-002](docs/adr/002-language-alternatives.md).
 
 ## Quickstart

@@ -13,20 +13,10 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Next
 
+- [ ] First evening with the gang (user): home server up (`docs/homeserver.md`), installer
+      + invites out (`docs/mittesten.md`), collect diagnostics files; write down what broke
 - [ ] Homeserver walkthrough (user, hands-on): follow `docs/homeserver.md` on the mini PC
       behind the FRITZ!Box — DS-Lite check first; note in the guide what did not match
-- [ ] Test client for the gang: minimal UI (join with a pasted invite = server address +
-      token, who is in the room, who speaks, mute, device choice), a debug panel that can
-      be shown (connection state, ICE round trip, jitter buffer, loss, concealed samples,
-      levels, device buffers, xruns, event timeline), and logging from day one (structured,
-      to a rotating file, covering connection, devices, stats snapshots; export as a file).
-      - Problem while gaming: only people who can use a terminal can test today, and when
-        something sounds wrong nobody can say what happened.
-      - Planes: client only. The spike code moves into `crates/transport` (LiveKit) and
-        `crates/audio-engine` (cpal, rings, mixer) behind `engine-protocol`; control and
-        media stay as they are. The pasted invite stands in for the control plane (S6).
-      - Deliberately not built: login/invite links, channels, PTT, DSP chain (S2), updater,
-        resampling for non-48-kHz devices.
 - [ ] S1 rest: mouth-to-ear with a loopback cable (Focusrite out → in) via
       `yappa-poc measure --acoustic`; second machine in the LAN: cable pulled at the PC,
       Wi-Fi switch, speech by ear at 5/10/20 % loss, speakers for the AEC question; spike on
@@ -38,6 +28,13 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Later
 
+- [ ] Engine follow-ups from the test client (ADR-003, realtime review 2026-10-10):
+      drift compensation instead of jumping at the high-water mark; resampling for devices
+      that are not at 48 kHz; transport events carry a session number so a late event of a
+      replaced join cannot touch the new one; a "nothing arrives" warning before the SDK
+      notices (the per-second stats show a dead link at once, the SDK after ≈ 14 s)
+- [ ] Echo cancellation for people on speakers (S1 left it open; testers are told to use
+      a headset)
 - [ ] Outage detection: the client needs ≈ 14 s to notice a dead link (S1) — find the
       source (signal ping timeout?) and detect silence on the wire sooner
 - [ ] `lk load-test` with 20 publishers against the dev server (needs the `lk` CLI)
@@ -56,6 +53,10 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Done
 
+- [x] Test client: `crates/transport` (trait + LiveKit), `crates/audio-engine` (devices,
+      pump, 24-slot mixer, levels, rejoin), shell with logging and diagnostics export, UI
+      with invite join, participants, per-person volume, debug panel; headless example;
+      ADR-003; tester guide `docs/mittesten.md` (2026-10-10)
 - [x] Home server (stage 1) prepared: `infra/livekit/home.yml` (LiveKit + Caddy, host
       network), `.env.example`, `cargo xtask livekit token <name>`, `yappa-poc --token`,
       guide `docs/homeserver.md` for FRITZ!Box + Linux VM (2026-10-10)
