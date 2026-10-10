@@ -96,6 +96,69 @@ pub struct VoiceToken {
     pub expires_at: String,
 }
 
+/// What a person needs to join a voice room: where the media server is and a token for it.
+///
+/// Until the control plane hands out a [`VoiceToken`] per login (S6), an invite is one line
+/// of text (`cargo xtask livekit token`) that is pasted into the client. The text form is
+/// `yappa1.` followed by the base64url of the JSON — made to survive a chat window, not to
+/// hide anything: whoever has the text can join.
+#[derive(Serialize, Deserialize, TS, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct Invite {
+    /// `wss://…` (or `ws://localhost:7880` in development).
+    pub url: String,
+    pub token: String,
+}
+
+const INVITE_PREFIX: &str = "yappa1.";
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum InviteError {
+    /// Does not start with the prefix — some other text was pasted.
+    NotAnInvite,
+    /// Starts right but does not decode — usually copied incompletely.
+    Damaged,
+    /// Decodes, but the server address is not a `ws://` or `wss://` URL.
+    BadUrl,
+}
+
+impl std::fmt::Display for InviteError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::NotAnInvite => "not a yAPPA invite (it starts with \"yappa1.\")",
+            Self::Damaged => "the invite is damaged or was copied incompletely",
+            Self::BadUrl => "the invite has no valid server address",
+        })
+    }
+}
+
+impl Invite {
+    pub fn encode(&self) -> String {
+        use base64::Engine as _;
+        let json = serde_json::to_vec(self).expect("an invite is two strings");
+        INVITE_PREFIX.to_string() + &base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(json)
+    }
+
+    /// Accepts what [`encode`](Self::encode) produced, also with whitespace around it or
+    /// line breaks inside it (chat programs wrap long lines).
+    pub fn decode(text: &str) -> Result<Self, InviteError> {
+        use base64::Engine as _;
+        let compact: String = text.chars().filter(|c| !c.is_whitespace()).collect();
+        let payload = compact
+            .strip_prefix(INVITE_PREFIX)
+            .ok_or(InviteError::NotAnInvite)?;
+        let json = base64::engine::general_purpose::URL_SAFE_NO_PAD
+            .decode(payload)
+            .map_err(|_| InviteError::Damaged)?;
+        let invite: Self = serde_json::from_slice(&json).map_err(|_| InviteError::Damaged)?;
+        if !(invite.url.starts_with("wss://") || invite.url.starts_with("ws://")) {
+            return Err(InviteError::BadUrl);
+        }
+        Ok(invite)
+    }
+}
+
 /// Who sits where; pushed to clients, built from LiveKit webhooks + heartbeats.
 #[derive(Serialize, Deserialize, TS, Debug, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -124,5 +187,39 @@ mod tests {
     #[test]
     fn role_serializes_lowercase() {
         assert_eq!(serde_json::to_string(&Role::Admin).unwrap(), "\"admin\"");
+    }
+
+    #[test]
+    fn invite_round_trips_and_survives_a_chat_window() {
+        let invite = Invite {
+            url: "wss://voice.example".into(),
+            token: "eyJ0eXAi.payload.signature".into(),
+        };
+        let text = invite.encode();
+        assert!(text.starts_with("yappa1."));
+        assert_eq!(Invite::decode(&text), Ok(invite.clone()));
+        let wrapped = format!("  {}\n{}  \n", &text[..20], &text[20..]);
+        assert_eq!(Invite::decode(&wrapped), Ok(invite));
+    }
+
+    #[test]
+    fn invite_errors_say_what_is_wrong() {
+        assert_eq!(Invite::decode("hallo"), Err(InviteError::NotAnInvite));
+        assert_eq!(Invite::decode("yappa1.%%%"), Err(InviteError::Damaged));
+        let text = Invite {
+            url: "wss://voice.example".into(),
+            token: "t".into(),
+        }
+        .encode();
+        assert_eq!(
+            Invite::decode(&text[..text.len() - 3]),
+            Err(InviteError::Damaged)
+        );
+        let http = Invite {
+            url: "https://voice.example".into(),
+            token: "t".into(),
+        }
+        .encode();
+        assert_eq!(Invite::decode(&http), Err(InviteError::BadUrl));
     }
 }

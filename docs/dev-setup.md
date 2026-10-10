@@ -57,13 +57,39 @@ Docker, `lk` and `gh` come from the OS package manager (winget / brew).
 | `cargo xtask livekit down` / `logs` | stop it / follow the server log |
 | `cargo xtask livekit loss <percent>` | drop that share of packets in both directions (tc/netem in a sidecar); `0` clears |
 | `cargo xtask livekit cut <seconds>` | drop everything for that long, then restore — the pulled cable |
-| `cargo xtask livekit token <name> [--room gang] [--days 30]` | join token for one person, signed with the keys in `infra/livekit/.env` (dev keys without one) — see [homeserver.md](homeserver.md) |
+| `cargo xtask livekit token <name> [--room gang] [--days 30] [--jwt]` | an invite for one person (server address + join token as one line to paste into the app), signed with the keys in `infra/livekit/.env` (dev keys and `ws://localhost:7880` without one); `--jwt` prints the bare token — see [homeserver.md](homeserver.md) |
+| `cargo run --release -p yappa-desktop --example headless -- --invite <text>` | the app's engine without a window: same transport and devices, events as JSON lines on stdout — for measuring and for checking a server |
 | `cargo run --release -p spike-s1 -- measure` | S1 PoC (`yappa-poc`): click latency between two participants; also `devices`, `join --identity <name>` — options at the top of `crates/spike-s1/src/main.rs` |
 
 Windows links the **static C runtime** (`+crt-static` in `.cargo/config.toml`): LiveKit's
 prebuilt libwebrtc is built that way and the linker refuses a mix (LNK2038). The first build
 downloads libwebrtc (a few hundred MB) into `target/`; if that step fails once with "access
 denied" while moving the extracted files, run the build again.
+
+### Trying the app against the local server
+
+```bash
+cargo xtask livekit                          # local LiveKit
+cargo xtask livekit token me --room dev      # prints an invite for ws://localhost:7880
+cargo xtask dev                              # paste the invite, join
+```
+
+A second participant without a second machine: `cargo run --release -p spike-s1 -- join
+--identity klicker --room dev --source click --sink null` publishes clicks into the room.
+
+Two environment variables help while developing (not meant for users):
+`YAPPA_AUTOJOIN=<invite>` joins right after start, `YAPPA_DEBUG_PANEL=1` opens the debug
+panel at start.
+
+### Logs
+
+The shell sets up `tracing` (ADR-003): JSON lines in the app's log folder
+(`%LOCALAPPDATA%\dev.crisin.yappa-b\logs` on Windows, `~/Library/Logs/dev.crisin.yappa-b`
+on macOS), one file per day, seven kept. Our crates log at debug level there — including one
+line per second with target `stats` while in a call — other crates from info. The debug panel
+shows info and above; "Diagnose-Datei speichern" writes version, settings and the log files
+into one text file in the Downloads folder. Tokens and invites are never logged. In code:
+`tracing::info!(field = %value, "what happened")`, never in an audio callback.
 
 Build profiles (root `Cargo.toml`): in **dev**, all dependencies and the `dsp` crate are
 optimised (`opt-level` 2/3) while our own crates stay debuggable — debug-speed DSP would make

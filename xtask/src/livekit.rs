@@ -6,10 +6,11 @@
 //!   logs             follow the server log
 //!   loss <percent>   drop that share of packets in both directions; 0 clears
 //!   cut <seconds>    drop everything for that long, then restore (cable pull)
-//!   token <name> [--room gang] [--days 30]
-//!                    a join token for one person, signed with the keys in
+//!   token <name> [--room gang] [--days 30] [--jwt]
+//!                    an invite for one person (server address + join token as one line
+//!                    to paste into the client), signed with the keys in
 //!                    infra/livekit/.env (dev keys if there is no .env) — the stand-in
-//!                    for the control plane until S6
+//!                    for the control plane until S6. --jwt prints the bare token.
 
 use crate::Result;
 use livekit_api::access_token::{AccessToken, VideoGrants};
@@ -59,10 +60,10 @@ pub fn run(root: &Path, args: &[String]) -> Result {
     }
 }
 
-/// Prints a join token and how to use it. Whoever holds the token can join that room
+/// Prints an invite (or the bare token) for one person. Whoever holds the token can join that room
 /// until it expires; the only way to revoke it is a new key pair on the server.
 fn token(root: &Path, args: &[String]) -> Result {
-    const USAGE: &str = "usage: cargo xtask livekit token <name> [--room gang] [--days 30]";
+    const USAGE: &str = "usage: cargo xtask livekit token <name> [--room gang] [--days 30] [--jwt]";
     let name = args.first().filter(|a| !a.starts_with("--")).ok_or(USAGE)?;
     let option = |flag: &str| {
         let i = args.iter().position(|a| a == flag)?;
@@ -100,8 +101,13 @@ fn token(root: &Path, args: &[String]) -> Result {
         .map_err(|e| format!("token: {e}"))?;
 
     eprintln!("{name} · room '{room}' · valid {days} days · {url}");
-    eprintln!("use it with: yappa-poc join --url {url} --token <token>");
-    println!("{jwt}");
+    if args.iter().any(|a| a == "--jwt") {
+        eprintln!("bare token, for: yappa-poc join --url {url} --token <token>");
+        println!("{jwt}");
+    } else {
+        eprintln!("invite — paste it into the client under \"Einladung\":");
+        println!("{}", api_types::Invite { url, token: jwt }.encode());
+    }
     Ok(())
 }
 

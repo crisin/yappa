@@ -1,0 +1,21 @@
+[package]
+name = "transport"
+description = "Engine <-> media plane seam: the Transport trait, and LiveKit behind the `livekit` feature. No DSP, no audio devices."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# The LiveKit implementation. Off by default so the engine can depend on this crate for
+# the trait alone; the shell that wires engine and transport together turns it on.
+livekit = ["dep:livekit", "dep:futures-util", "dep:tokio"]
+
+[dependencies]
+tracing.workspace = true
+futures-util = { version = "0.3", optional = true }
+livekit = { version = "0.9", features = ["rustls-tls-native-roots"], optional = true }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"], optional = true }
+
+[lints]
+workspace = true

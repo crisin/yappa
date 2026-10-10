@@ -1,0 +1,23 @@
+[package]
+name = "audio-engine"
+description = "The audio engine: devices, capture pump, per-speaker mixer, levels; commands in, events out. No Tauri, no LiveKit."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+# realtime: cpal raises the priority of its audio threads (MMCSS "Pro Audio" on Windows).
+cpal = { version = "0.18", features = ["realtime"] }
+dsp.workspace = true
+engine-protocol.workspace = true
+rtrb.workspace = true
+tracing.workspace = true
+# The trait only — the LiveKit implementation is a feature this crate never enables.
+transport.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[lints]
+workspace = true

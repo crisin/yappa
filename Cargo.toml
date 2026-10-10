@@ -12,6 +12,11 @@ publish = false
 engine-protocol = { path = "crates/engine-protocol" }
 api-types = { path = "crates/api-types" }
 dsp = { path = "crates/dsp" }
+audio-engine = { path = "crates/audio-engine" }
+transport = { path = "crates/transport" }
+base64 = "0.23"
+rtrb = "0.4"
+tracing = "0.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 ts-rs = "12"

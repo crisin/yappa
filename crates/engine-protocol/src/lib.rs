@@ -61,6 +61,11 @@ pub enum Command {
         token: String,
     },
     Leave,
+    /// Ask for a fresh [`Event::Devices`] (a headset was plugged in).
+    RefreshDevices,
+    /// The UI (re)attached and missed what happened so far: send the current state again —
+    /// ready, devices, connection, room and participants.
+    Resync,
 }
 
 /// Engine -> UI.
@@ -90,6 +95,23 @@ pub enum Event {
     },
     Error {
         message: String,
+    },
+    /// We are in a room. Room and identity come from the token.
+    Joined {
+        room: String,
+        identity: String,
+    },
+    /// The complete list of the others in the room, sent on every change.
+    Participants {
+        participants: Vec<Participant>,
+    },
+    /// About once per second while audio runs — for the debug panel and the log.
+    Stats {
+        stats: Stats,
+    },
+    /// What the engine and the transport log at info level and above, as it happens.
+    Log {
+        entry: LogEntry,
     },
 }
 
@@ -149,6 +171,98 @@ pub struct PeerLevel {
     pub identity: String,
     pub level_db: f32,
     pub speaking: bool,
+}
+
+#[derive(Serialize, Deserialize, TS, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct Participant {
+    pub identity: String,
+    pub name: String,
+    /// We receive a voice track from them (otherwise they are in the room but silent to us).
+    pub has_voice: bool,
+    /// They muted their own microphone.
+    pub muted: bool,
+}
+
+#[derive(Serialize, Deserialize, TS, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub enum LogLevel {
+    Info,
+    Warn,
+    Error,
+}
+
+#[derive(Serialize, Deserialize, TS, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct LogEntry {
+    /// Milliseconds since the Unix epoch.
+    #[ts(type = "number")]
+    pub time_ms: u64,
+    pub level: LogLevel,
+    /// Where it came from, e.g. `transport::livekit`.
+    pub target: String,
+    pub message: String,
+}
+
+/// One snapshot of everything worth watching while a call runs. `None` = not known (yet).
+#[derive(Serialize, Deserialize, TS, Debug, Clone, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct Stats {
+    pub network: Option<NetworkStats>,
+    pub capture: Option<DeviceStats>,
+    pub playout: Option<DeviceStats>,
+    /// Longest gap between two 10 ms blocks handed to the transport since the last
+    /// snapshot — far above 10 means the send side stalled.
+    pub send_interval_max_ms: f32,
+    /// Capture blocks thrown away because a backlog had built up (total).
+    pub send_blocks_dropped: u32,
+    /// Received frames thrown away because a speaker's playout buffer was full (total).
+    pub playout_frames_dropped: u32,
+    /// Times playout jumped forward because a speaker's buffer ran over — their clock is
+    /// faster than our output device, or playout stalled (total).
+    pub playout_skips: u32,
+}
+
+/// From the transport's WebRTC statistics. "Recent" values cover the time since the
+/// previous snapshot, the others are totals for this connection.
+#[derive(Serialize, Deserialize, TS, Debug, Clone, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct NetworkStats {
+    /// Round trip to the media server (ICE connectivity checks).
+    pub rtt_ms: f32,
+    pub send_codec: String,
+    pub send_kbps_recent: f32,
+    pub packets_sent: u32,
+    /// Share of our packets the server reported missing, 0..100.
+    pub uplink_loss_percent: f32,
+    pub packets_received: u32,
+    pub packets_lost: u32,
+    pub loss_percent_recent: f32,
+    pub jitter_ms: f32,
+    /// Mean time a sample waited in the jitter buffer.
+    pub jitter_buffer_ms: f32,
+    /// Share of played samples the decoder had to invent — what loss sounds like.
+    pub concealed_percent_recent: f32,
+    pub concealed_percent_total: f32,
+}
+
+#[derive(Serialize, Deserialize, TS, Debug, Clone, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+#[ts(export)]
+pub struct DeviceStats {
+    pub name: String,
+    pub sample_rate: u32,
+    pub channels: u16,
+    /// Largest callback buffer seen, in frames — the effective device buffer.
+    pub callback_frames: u32,
+    /// Capture: samples lost because the engine did not keep up. Playout: times a
+    /// speaker's buffer ran dry.
+    pub xruns: u32,
 }
 
 #[derive(Serialize, Deserialize, TS, Debug, Clone, Copy, PartialEq)]
@@ -280,6 +394,20 @@ mod tests {
         };
         let back: Event = serde_json::from_str(&serde_json::to_string(&ev).unwrap()).unwrap();
         assert_eq!(ev, back);
+    }
+
+    #[test]
+    fn stats_use_null_for_unknown_and_camel_case() {
+        let json = serde_json::to_value(Event::Stats {
+            stats: Stats {
+                send_interval_max_ms: 10.5,
+                ..Stats::default()
+            },
+        })
+        .unwrap();
+        assert_eq!(json["type"], "stats");
+        assert_eq!(json["stats"]["network"], serde_json::Value::Null);
+        assert_eq!(json["stats"]["sendIntervalMaxMs"], 10.5);
     }
 
     #[test]
