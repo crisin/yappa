@@ -10,10 +10,12 @@
 //!   gen-types          engine-protocol + api-types -> apps/desktop/src/lib/types
 //!   tokens             ui-tokens/*.json -> apps/desktop/src/lib/tokens.css
 //!   bench              criterion benchmarks (DSP cost per 10 ms block)
+//!   livekit [cmd]      local LiveKit server in Docker: up | down | logs | loss <%> | cut <s>
 //!   coverage           line coverage as HTML (target/llvm-cov/html)
 //!   hook <name>        entry points for Claude Code hooks (see .claude/settings.json)
 
 mod hook;
+mod livekit;
 mod tokens;
 mod tools;
 
@@ -42,12 +44,13 @@ fn main() -> ExitCode {
         Some("tokens") => tokens::generate(&root),
         Some("bench") => cargo(&root, &["bench", "-p", "dsp"]),
         Some("coverage") => coverage(&root),
+        Some("livekit") => livekit::run(&root, &args[1..]),
         Some("hook") => hook::run(&root, args.get(1).map(String::as_str)),
         _ => {
             eprintln!(
                 "usage: cargo xtask <dev [--ui] | build [--debug] | setup | doctor \
                  | check [--fast|--ci] | test | gen-types | tokens | bench | coverage \
-                 | hook <post-edit|session-start>>"
+                 | livekit [up|down|logs|loss <%>|cut <s>] | hook <post-edit|session-start>>"
             );
             return ExitCode::from(2);
         }

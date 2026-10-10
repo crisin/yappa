@@ -13,9 +13,10 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Next
 
-- [ ] S1 prep: `infra/livekit/dev.yml` + `cargo xtask livekit` (local LiveKit, dev keys)
-- [ ] S1: PoC — engine CLI, two clients hear each other via local LiveKit; loopback-click
-      latency, packet loss, reconnect with pulled cable → `docs/spikes/s1-poc.md`
+- [ ] S1 rest: mouth-to-ear with a loopback cable (Focusrite out → in) via
+      `yappa-poc measure --acoustic`; second machine in the LAN: cable pulled at the PC,
+      Wi-Fi switch, speech by ear at 5/10/20 % loss, speakers for the AEC question; spike on
+      the MacBook → add to `docs/spikes/s1-poc.md`
 - [ ] S6: Control plane in Rust — axum + sqlx/SQLite, invite login, token issuing, webhook
       presence → `docs/spikes/s6-control.md`
 - [ ] S2: Offline DSP chain WAV → DeepFilterNet → gate → EQ → WAV, latency + CPU per block
@@ -23,6 +24,9 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Later
 
+- [ ] Outage detection: the client needs ≈ 14 s to notice a dead link (S1) — find the
+      source (signal ping timeout?) and detect silence on the wire sooner
+- [ ] `lk load-test` with 20 publishers against the dev server (needs the `lk` CLI)
 - [ ] S4 (optional): clack-host loads a CLAP plugin
 - [ ] Phase 1 · Playable core · Phase 2 · Quality · Phase 3 · Extensions (see
       `docs/00-grobstruktur.md`, "Projekt-Vorgehen")
@@ -38,6 +42,11 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Done
 
+- [x] S1: PoC — `crates/spike-s1` (`yappa-poc`): two clients hear each other via local
+      LiveKit, RED/bitrate verified, click latency 50–60 ms (digital path), loss and
+      reconnect measured → `docs/spikes/s1-poc.md`; Rust SDK stays (2026-10-10)
+- [x] S1 prep: `infra/livekit/dev.yml` (LiveKit v1.13.8 + netem sidecar) and
+      `cargo xtask livekit up|down|logs|loss|cut` (2026-10-10)
 - [x] Logo "for now": cat as app icon set, sidebar logo and favicon; `cargo xtask dev`
       checked on Windows by the user (2026-10-07)
 - [x] Dev/prod build commands: `cargo xtask dev|build`, npm `app:*` scripts, release profile,
