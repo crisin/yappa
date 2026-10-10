@@ -1,0 +1,4 @@
+# TLS in front of LiveKit's signalling port. The certificate comes from Let's Encrypt.
+{$YAPPA_DOMAIN} {
+	reverse_proxy localhost:7880
+}

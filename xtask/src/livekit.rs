@@ -6,18 +6,27 @@
 //!   logs             follow the server log
 //!   loss <percent>   drop that share of packets in both directions; 0 clears
 //!   cut <seconds>    drop everything for that long, then restore (cable pull)
+//!   token <name> [--room gang] [--days 30]
+//!                    a join token for one person, signed with the keys in
+//!                    infra/livekit/.env (dev keys if there is no .env) — the stand-in
+//!                    for the control plane until S6
 
 use crate::Result;
+use livekit_api::access_token::{AccessToken, VideoGrants};
 use std::path::Path;
 use std::process::Command;
 use std::time::Duration;
 
 const COMPOSE: &str = "infra/livekit/dev.yml";
+const ENV_FILE: &str = "infra/livekit/.env";
 const IFACE: &str = "eth0";
 
 pub fn run(root: &Path, args: &[String]) -> Result {
-    crate::tools::require(&["docker"])?;
     let arg = |i: usize| args.get(i).map(String::as_str);
+    if arg(0) == Some("token") {
+        return token(root, &args[1..]);
+    }
+    crate::tools::require(&["docker"])?;
     match arg(0) {
         None | Some("up") => {
             compose(root, &["up", "-d", "--wait"])?;
@@ -45,9 +54,67 @@ pub fn run(root: &Path, args: &[String]) -> Result {
             Ok(())
         }
         Some(other) => Err(format!(
-            "unknown: livekit {other} — up | down | logs | loss <percent> | cut <seconds>"
+            "unknown: livekit {other} — up | down | logs | loss <percent> | cut <seconds> | token <name>"
         )),
     }
+}
+
+/// Prints a join token and how to use it. Whoever holds the token can join that room
+/// until it expires; the only way to revoke it is a new key pair on the server.
+fn token(root: &Path, args: &[String]) -> Result {
+    const USAGE: &str = "usage: cargo xtask livekit token <name> [--room gang] [--days 30]";
+    let name = args.first().filter(|a| !a.starts_with("--")).ok_or(USAGE)?;
+    let option = |flag: &str| {
+        let i = args.iter().position(|a| a == flag)?;
+        args.get(i + 1).map(String::as_str)
+    };
+    let room = option("--room").unwrap_or("gang");
+    let days: u64 = option("--days")
+        .unwrap_or("30")
+        .parse()
+        .map_err(|_| USAGE)?;
+
+    let env = read_env(&root.join(ENV_FILE));
+    let get = |key: &str| env.iter().find(|(k, _)| k == key).map(|(_, v)| v.as_str());
+    let (key, secret, url) = match (get("LIVEKIT_API_KEY"), get("LIVEKIT_API_SECRET")) {
+        (Some(key), Some(secret)) => {
+            let domain =
+                get("YAPPA_DOMAIN").ok_or(format!("YAPPA_DOMAIN missing in {ENV_FILE}"))?;
+            (key, secret, format!("wss://{domain}"))
+        }
+        _ => {
+            eprintln!("no keys in {ENV_FILE} — signing with the dev keys for the local server");
+            ("devkey", "secret", "ws://localhost:7880".to_string())
+        }
+    };
+    let jwt = AccessToken::with_api_key(key, secret)
+        .with_identity(name)
+        .with_name(name)
+        .with_ttl(Duration::from_secs(days * 24 * 3600))
+        .with_grants(VideoGrants {
+            room_join: true,
+            room: room.to_string(),
+            ..Default::default()
+        })
+        .to_jwt()
+        .map_err(|e| format!("token: {e}"))?;
+
+    eprintln!("{name} · room '{room}' · valid {days} days · {url}");
+    eprintln!("use it with: yappa-poc join --url {url} --token <token>");
+    println!("{jwt}");
+    Ok(())
+}
+
+/// KEY=VALUE lines; empty values count as not set.
+fn read_env(path: &Path) -> Vec<(String, String)> {
+    std::fs::read_to_string(path)
+        .unwrap_or_default()
+        .lines()
+        .filter(|l| !l.trim_start().starts_with('#'))
+        .filter_map(|l| l.split_once('='))
+        .map(|(k, v)| (k.trim().to_string(), v.trim().trim_matches('"').to_string()))
+        .filter(|(_, v)| !v.is_empty())
+        .collect()
 }
 
 fn parse(arg: Option<&str>, usage: &str) -> Result<u32> {

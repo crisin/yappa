@@ -13,6 +13,20 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Next
 
+- [ ] Homeserver walkthrough (user, hands-on): follow `docs/homeserver.md` on the mini PC
+      behind the FRITZ!Box — DS-Lite check first; note in the guide what did not match
+- [ ] Test client for the gang: minimal UI (join with a pasted invite = server address +
+      token, who is in the room, who speaks, mute, device choice), a debug panel that can
+      be shown (connection state, ICE round trip, jitter buffer, loss, concealed samples,
+      levels, device buffers, xruns, event timeline), and logging from day one (structured,
+      to a rotating file, covering connection, devices, stats snapshots; export as a file).
+      - Problem while gaming: only people who can use a terminal can test today, and when
+        something sounds wrong nobody can say what happened.
+      - Planes: client only. The spike code moves into `crates/transport` (LiveKit) and
+        `crates/audio-engine` (cpal, rings, mixer) behind `engine-protocol`; control and
+        media stay as they are. The pasted invite stands in for the control plane (S6).
+      - Deliberately not built: login/invite links, channels, PTT, DSP chain (S2), updater,
+        resampling for non-48-kHz devices.
 - [ ] S1 rest: mouth-to-ear with a loopback cable (Focusrite out → in) via
       `yappa-poc measure --acoustic`; second machine in the LAN: cable pulled at the PC,
       Wi-Fi switch, speech by ear at 5/10/20 % loss, speakers for the AEC question; spike on
@@ -42,6 +56,9 @@ States: **now** (in progress, max. 2) · **next** (planned, ordered) · **later*
 
 ## Done
 
+- [x] Home server (stage 1) prepared: `infra/livekit/home.yml` (LiveKit + Caddy, host
+      network), `.env.example`, `cargo xtask livekit token <name>`, `yappa-poc --token`,
+      guide `docs/homeserver.md` for FRITZ!Box + Linux VM (2026-10-10)
 - [x] S1: PoC — `crates/spike-s1` (`yappa-poc`): two clients hear each other via local
       LiveKit, RED/bitrate verified, click latency 50–60 ms (digital path), loss and
       reconnect measured → `docs/spikes/s1-poc.md`; Rust SDK stays (2026-10-10)

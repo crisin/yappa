@@ -7,6 +7,8 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+# Token signing only (`cargo xtask livekit token`) — no WebRTC in here.
+livekit-api = { version = "0.8", default-features = false, features = ["access-token"] }
 serde_json.workspace = true
 
 [lints]
