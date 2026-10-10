@@ -1,0 +1,31 @@
+# Stage 0: local LiveKit for engine work and LAN tests — `cargo xtask livekit`.
+# Dev keys (devkey / secret) only; never expose this to the internet.
+name: yappa-dev
+
+services:
+  livekit:
+    image: livekit/livekit-server:v1.13.8
+    command:
+      - --dev
+      - --config=/etc/livekit.yaml
+      - --bind=0.0.0.0
+      # The address clients are told to send media to. 127.0.0.1 = clients on this machine;
+      # for a second machine in the LAN set LIVEKIT_NODE_IP to this machine's LAN address.
+      - --node-ip=${LIVEKIT_NODE_IP:-127.0.0.1}
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7880:7880/tcp" # signalling + API
+      - "7881:7881/tcp" # ICE over TCP (fallback)
+      - "7882:7882/udp" # media
+    restart: unless-stopped
+
+  # Shares the server's network namespace so `cargo xtask livekit loss|cut` can impair it
+  # with tc/netem (spike S1: packet loss, pulled cable). Idle otherwise.
+  netem:
+    image: nicolaka/netshoot:v0.14
+    network_mode: service:livekit
+    cap_add: [NET_ADMIN]
+    command: ["sleep", "infinity"]
+    depends_on: [livekit]
+    restart: unless-stopped

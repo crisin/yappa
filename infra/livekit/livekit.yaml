@@ -1,0 +1,11 @@
+# LiveKit server config, stage 0 (dev). Keys come from `--dev` (devkey / secret, the public
+# LiveKit dev pair) — real keys never live in this file, see .env.example from stage 1 on.
+port: 7880
+rtc:
+  tcp_port: 7881
+  # One muxed UDP port instead of the 50000-60000 range: Docker Desktop cannot publish
+  # thousands of ports in reasonable time, and without host networking this is all we need.
+  udp_port: 7882
+  use_external_ip: false
+logging:
+  level: info

@@ -28,7 +28,8 @@ both machines and CI lint with the same clippy. Bump it in its own commit.
 | cargo-insta | required | reviewing snapshot changes (`cargo insta review`) |
 | cargo-llvm-cov | optional | `cargo xtask coverage` (HTML report) |
 | bacon | optional | clippy/tests continuously in a terminal (`bacon`, `bacon test`) |
-| Docker | from S1 | local LiveKit |
+| Docker | from S1 | local LiveKit (`cargo xtask livekit`) |
+| MSVC 2022 C++ toolset (Windows) | from S1 | the LiveKit SDK links a prebuilt libwebrtc that needs VS 2022 (17.x); 2019 fails in abseil |
 | `lk` (LiveKit CLI) | from S1 | tokens, rooms, `lk load-test` with 20 publishers |
 | gh | optional | once the repo is on GitHub |
 
@@ -52,6 +53,10 @@ Docker, `lk` and `gh` come from the OS package manager (winget / brew).
 | `cargo xtask bench` | criterion: DSP cost per 10 ms block |
 | `cargo xtask coverage` | line coverage, opens the HTML report |
 | `cargo xtask doctor` / `setup` | see above |
+| `cargo xtask livekit` | local LiveKit in Docker (`infra/livekit/dev.yml`): ws://localhost:7880, dev keys `devkey` / `secret`, media on udp/7882 |
+| `cargo xtask livekit down` / `logs` | stop it / follow the server log |
+| `cargo xtask livekit loss <percent>` | drop that share of packets in both directions (tc/netem in a sidecar); `0` clears |
+| `cargo xtask livekit cut <seconds>` | drop everything for that long, then restore — the pulled cable |
 
 Build profiles (root `Cargo.toml`): in **dev**, all dependencies and the `dsp` crate are
 optimised (`opt-level` 2/3) while our own crates stay debuggable — debug-speed DSP would make

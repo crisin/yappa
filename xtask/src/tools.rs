@@ -164,6 +164,18 @@ pub fn doctor(root: &Path) -> Result {
         }
     }
 
+    // LiveKit's prebuilt libwebrtc (from S1) only compiles against the 2022 toolset.
+    if cfg!(windows) {
+        let status = match msvc_2022() {
+            Some(v) => format!("✔ {v}"),
+            None => "✘ needed from S1 (LiveKit SDK) → `winget install \
+                     Microsoft.VisualStudio.2022.BuildTools`, workload \"Desktop development \
+                     with C++\""
+                .to_string(),
+        };
+        println!("\nMSVC 2022      {status}");
+    }
+
     let hooks = git_config(root, "core.hooksPath");
     let template = git_config(root, "commit.template");
     println!(
@@ -220,6 +232,23 @@ pub fn setup(root: &Path) -> Result {
     git(root, &["config", "commit.template", ".gitmessage"])?;
     println!();
     doctor(root)
+}
+
+/// Version of a Visual Studio 2022+ installation that has the C++ toolset, if any.
+fn msvc_2022() -> Option<String> {
+    let vswhere = Path::new(&std::env::var_os("ProgramFiles(x86)")?)
+        .join("Microsoft Visual Studio/Installer/vswhere.exe");
+    let out = Command::new(vswhere)
+        .args(["-products", "*", "-latest", "-version", "[17.0,)"])
+        .args([
+            "-requires",
+            "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        ])
+        .args(["-property", "catalog_productDisplayVersion"])
+        .output()
+        .ok()?;
+    let v = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    (!v.is_empty()).then_some(v)
 }
 
 fn git(root: &Path, args: &[&str]) -> Result {
